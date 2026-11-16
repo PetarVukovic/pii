@@ -1,6 +1,6 @@
 {
   "name": "@newmean-ai/pii",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Browser-side multilingual PII detection and masking with small on-device models",
   "license": "Apache-2.0",
   "author": "newmean.ai",
@@ -18,7 +18,9 @@
     "ner",
     "onnx",
     "browser",
-    "multilingual"
+    "multilingual",
+    "ai-sdk",
+    "langchain"
   ],
   "type": "module",
   "main": "./dist/index.js",
@@ -28,6 +30,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./ai-sdk": {
+      "types": "./dist/ai-sdk.d.ts",
+      "import": "./dist/ai-sdk.js",
+      "default": "./dist/ai-sdk.js"
+    },
+    "./langchain": {
+      "types": "./dist/langchain.d.ts",
+      "import": "./dist/langchain.js",
+      "default": "./dist/langchain.js"
     }
   },
   "files": [
@@ -46,9 +58,18 @@
   "dependencies": {
     "onnxruntime-web": "1.31.1"
   },
+  "peerDependencies": {
+    "langchain": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "langchain": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/node": "^24.10.1",
     "esbuild": "0.28.2",
+    "langchain": "^1.6.6",
     "typescript": "6.0.3",
     "vite": "8.3.4",
     "vitest": "5.0.3"

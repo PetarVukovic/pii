@@ -31,8 +31,8 @@ const { text, spans } = await redactor.redact("My email is kim@example.com");
 |---|---|---|
 | 브라우저, Node.js | [`@newmean-ai/pii`](https://www.npmjs.com/package/@newmean-ai/pii) | `npm install @newmean-ai/pii` |
 | Python 3.9+ | [`newmean-pii`](https://pypi.org/project/newmean-pii/) | `pip install newmean-pii` |
-| iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | `https://github.com/newmean-ai/pii` 추가, `1.5.0`부터 |
-| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.5.0")` |
+| iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | `https://github.com/newmean-ai/pii` 추가, `1.6.0`부터 |
+| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
 | Flutter, Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
 
 Python, iOS, Android, Flutter 패키지는 같은 모델을 기기에서 C 엔진 하나([`native/core`](native/core))로 실행하며, 토큰 id·오프셋·
@@ -196,6 +196,16 @@ relaxed-SIMD 빌드와 같은 방식이며 약 1.5배 빠릅니다(medium, Apple
 74,768개 결과 중 1개가 달랐습니다. arm64의 결과는 이제 npm 패키지의 relaxed-SIMD 빌드(Chrome, Edge, Firefox)와 같고, 바뀐 것이
 없는 x86-64와는 더 이상 비트 단위로 같지 않습니다. 코어를 `PII_NO_FMA`로 빌드하면 1.4의 커널을 씁니다
 ([native/core](native/core/README.ko.md)). npm 패키지는 1.4.1과 같은 구간을 냅니다.
+
+1.6에서 더한 것. SDK 1.6.0이며 모델은 v1.1 그대로이고, 어댑터만 더했습니다. `detect`와 `redact`의 결과는 1.5.0과 같습니다.
+Python 패키지에 `newmean_pii.langchain`(LangChain 1.0 이상용 탐지기와 바로 쓰는 `PIIMiddleware`), `newmean_pii.litellm`
+(LiteLLM 프록시 안에서 요청이나 응답을 가리는 guardrail, 따로 띄울 서비스 없음), `newmean_pii.presidio`(Microsoft
+Presidio용 recognizer, 모델 하나로 언어마다 하나씩), `newmean_pii.langfuse`(기록용 `mask` 함수)가 생겼고, npm 패키지에
+`@newmean-ai/pii/ai-sdk`(Vercel AI SDK language model middleware)와 `@newmean-ai/pii/langchain`(LangChain.js 에이전트
+미들웨어)이 생겼습니다. 이 라이브러리들은 의존성이 아닙니다. Python은 extras `[langchain]`, `[litellm]`, `[presidio]`로
+함께 설치하고, npm 패키지에서 `langchain`은 선택 peer 의존성입니다. 어댑터는 보내거나 저장하는 글을 가리며, 응답에서 값을
+되돌리지는 않습니다. 안내: [python/README.ko.md](python/README.ko.md#통합), [js/README.ko.md](js/README.ko.md#vercel-ai-sdk).
+Swift, Android, Flutter 패키지는 버전 번호만 바뀝니다.
 
 ## 저장소 구성
 

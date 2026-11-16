@@ -6,6 +6,7 @@
 import { createRedactor, DEFAULT_VARIANT } from "../../src/redactor.js";
 import type { EngineName } from "../../src/engines/engine.js";
 import type { Size } from "../../src/models.js";
+import { VERSION } from "../../src/version.js";
 import { relaxedSimdSupported } from "../../src/engines/builtin.js";
 import TEXTS from "../custom-wasm/bench/texts.json";
 
@@ -423,6 +424,7 @@ function refreshNote() {
 }
 
 async function save(run: Run) {
+  run.sdk = VERSION; // SDK version of this build, so runs can be compared across releases (runs before 1.5.0 have none)
   rows.push(run);
   render();
   try {

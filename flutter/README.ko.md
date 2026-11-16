@@ -8,7 +8,7 @@ Flutter·Dart 앱에서 텍스트 속 개인정보를 **기기 안에서** 찾�
 
 ```yaml
 dependencies:
-  newmean_pii: ^1.5.0
+  newmean_pii: ^1.6.0
 ```
 
 ```dart

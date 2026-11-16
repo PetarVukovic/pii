@@ -31,8 +31,8 @@ See [js/README.md](js/README.md) for the full API.
 |---|---|---|
 | Browser, Node.js | [`@newmean-ai/pii`](https://www.npmjs.com/package/@newmean-ai/pii) | `npm install @newmean-ai/pii` |
 | Python 3.9+ | [`newmean-pii`](https://pypi.org/project/newmean-pii/) | `pip install newmean-pii` |
-| iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | add `https://github.com/newmean-ai/pii`, from `1.5.0` |
-| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.5.0")` |
+| iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | add `https://github.com/newmean-ai/pii`, from `1.6.0` |
+| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
 | Flutter, Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
 
 The Python, iOS, Android and Flutter packages run the same models on the device through one C engine
@@ -207,6 +207,17 @@ rare cases: on 18,692 development texts and the four sizes, 1 of 74,768 results 
 package's relaxed-SIMD build (Chrome, Edge, Firefox) and are no longer bit-identical to x86-64, where nothing changes;
 building the core with `PII_NO_FMA` keeps the 1.4 kernel ([native/core](native/core/README.md#build)). The npm package
 gives the 1.4.1 spans.
+
+What 1.6 adds. SDK 1.6.0, same v1.1 models; adapters only, and `detect` and `redact` give the 1.5.0 spans. The Python
+package gains `newmean_pii.langchain` (a detector and a ready `PIIMiddleware` for LangChain 1.0+), `newmean_pii.litellm`
+(a guardrail that masks requests or responses inside the LiteLLM proxy, with no second service),
+`newmean_pii.presidio` (a recognizer for Microsoft Presidio, one per language on a single model) and
+`newmean_pii.langfuse` (a `mask` function for traces); the npm package gains `@newmean-ai/pii/ai-sdk` (a Vercel AI SDK
+language model middleware) and `@newmean-ai/pii/langchain` (a LangChain.js agent middleware). None of these libraries is a
+dependency: the Python extras `[langchain]`, `[litellm]` and `[presidio]` add them, and `langchain` is an optional peer
+dependency of the npm package. The adapters mask what is sent or stored and do not put the values back into a response.
+Guides: [python/README.md](python/README.md#integrations), [js/README.md](js/README.md#vercel-ai-sdk). The Swift, Android
+and Flutter packages change only their version number.
 
 ## Repository layout
 

@@ -3,11 +3,14 @@
 // - /mobile-bench: redirect to the trailing-slash URL so the page's relative paths resolve (query kept);
 // - /mobile-bench/models/*: model files; while the Worker secret BENCH_KEY is set, only with that share code (?k=);
 // - /api/bench: phone-bench results from the page, stored in D1. No IP or other request metadata is stored.
+// - /api/demo: the demo's speed numbers (model size, engine, ms, tokens, coarse device class, sample or own text; never the
+//   text), one Analytics Engine data point per run or model load, plus the country Cloudflare reports. No IP is stored.
 
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
   BENCH_KEY?: string;
+  DEMO?: AnalyticsEngineDataset;
 }
 
 const MAX_BODY = 64 * 1024;
@@ -41,6 +44,47 @@ async function saveRun(request: Request, env: Env) {
   return json(200, { ok: true });
 }
 
+// Analytics Engine row: blob1 kind (run|load), blob2 size, blob3 engine, blob4 src (sample|own|-), blob5 os, blob6 browser,
+// blob7 mobile (1|0), blob8 lang, blob9 SDK version, blob10 session, blob11 country; double1 ms, double2 tokens,
+// double3 cores, double4 device memory GB; index1 session. Read with the SQL API (dataset pii_demo_runs).
+const MAX_DEMO_EVENTS = 100;
+const pick = (v: unknown, ok: readonly string[]) => (typeof v === "string" && ok.includes(v) ? v : "-");
+const num = (v: unknown, max: number) => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.min(v, max) : 0);
+
+async function saveDemo(request: Request, env: Env) {
+  if (request.method !== "POST") return json(405, { error: "method" });
+  if (!env.DEMO) return json(503, { error: "off" });
+  const text = await request.text();
+  if (text.length > 32 * 1024) return json(413, { error: "size" });
+  let b: Record<string, any>;
+  try {
+    b = JSON.parse(text);
+  } catch {
+    return json(400, { error: "json" });
+  }
+  const session = typeof b.session === "string" ? b.session.replace(/[^a-z0-9-]/gi, "").slice(0, 40) : "";
+  if (!session || !Array.isArray(b.events)) return json(400, { error: "fields" });
+  const d = b.device ?? {};
+  const common = [
+    pick(d.os, ["iOS", "Android", "macOS", "Windows", "Linux", "ChromeOS", "other"]),
+    pick(d.browser, ["Chrome", "Safari", "Firefox", "Edge", "Samsung", "other"]),
+    d.mobile ? "1" : "0",
+    pick(b.lang, ["en", "ko", "ja", "zh", "zh-Hant", "es", "fr", "de", "pt"]),
+    typeof b.v === "string" ? b.v.slice(0, 20) : "-",
+    session,
+    String((request as any).cf?.country ?? "-").slice(0, 2),
+  ];
+  for (const e of b.events.slice(0, MAX_DEMO_EVENTS)) {
+    env.DEMO.writeDataPoint({
+      blobs: [pick(e.kind, ["run", "load"]), pick(e.size, ["nano", "small", "medium", "large"]), pick(e.engine, ["builtin", "onnxruntime"]),
+        pick(e.src, ["sample", "own"]), ...common],
+      doubles: [num(e.ms, 600_000), num(e.tokens, 100_000), num(d.cores, 256), num(d.memory, 64)],
+      indexes: [session],
+    });
+  }
+  return new Response(null, { status: 204 });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -50,6 +94,7 @@ export default {
     }
     if (url.pathname === "/mobile-bench") return Response.redirect(`${url.origin}/mobile-bench/${url.search}`, 301);
     if (url.pathname === "/api/bench") return saveRun(request, env);
+    if (url.pathname === "/api/demo") return saveDemo(request, env);
     if (url.pathname.startsWith("/api/")) return json(404, { error: "not found" });
     if (url.pathname.startsWith("/mobile-bench/models/")) {
       if (!keyOk(env, url.searchParams.get("k"))) return new Response("Forbidden", { status: 403 });

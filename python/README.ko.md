@@ -175,6 +175,78 @@ redactor.redact_table(tsv, "mask", delimiter="\t", vote=False)
 줄고, 개인정보가 없는 칸은 2.3~3.7점 더 가립니다. 재현율이 먼저라면 이 옵션을 쓰세요. 측정값:
 [저장소 README](https://github.com/newmean-ai/pii/blob/main/README.ko.md#표csv-tsv).
 
+## 통합
+
+LangChain, LiteLLM, Microsoft Presidio, Langfuse용 어댑터입니다. 프롬프트가 외부 LLM에 가기 전이나 기록이
+저장되기 전에 개인정보를 가립니다. 어댑터는 모두 모델을 내 프로세스 안에서 돌리며, 이 라이브러리들은 이 패키지의
+의존성이 아닙니다(`pip install "newmean-pii[langchain]"`, `"newmean-pii[litellm]"`, `"newmean-pii[presidio]"`로
+함께 설치).
+
+**LangChain**(1.0 이상): `PIIMiddleware`용 탐지기로, 모델을 한 번 불러 모든 레이블을 알려 줍니다.
+
+```python
+from langchain.agents import create_agent
+from newmean_pii.langchain import pii_middleware
+
+agent = create_agent("openai:gpt-6.1", middleware=[pii_middleware(size="medium")])
+# "김민수에게 010-1234-5678로 전화해 줘"는 모델에 "[REDACTED_PERSON]에게 [REDACTED_PHONE]로 전화해 줘"로 갑니다
+```
+
+`pii_middleware(redactor=None, *, strategy="redact", apply_to_input=True, apply_to_output=False,
+apply_to_tool_results=False, labels=None, name="pii", **create_redactor_options)`는 `PIIMiddleware`를 돌려줍니다.
+`strategy`는 LangChain의 값(`"redact"`, `"mask"`, `"hash"`, `"block"`)입니다. `pii_detector(redactor=None, *,
+labels=None, **options)`는 탐지기만 돌려줍니다. `(text) -> [{"type", "value", "start", "end"}]` 꼴이고 `type`은 소문자
+레이블이며, 직접 만든 `PIIMiddleware(...)`나 같은 꼴의 함수를 받는 코드에 쓸 수 있습니다. redactor를 주지 않으면 모델은
+첫 호출 때 읽습니다.
+
+**LiteLLM 프록시**: 따로 띄울 서비스가 없는 guardrail입니다. `config.yaml`에:
+
+```yaml
+guardrails:
+  - guardrail_name: "newmean-pii"
+    litellm_params:
+      guardrail: newmean_pii.litellm.NewmeanPIIGuardrail
+      mode: "pre_call"      # 요청을 보내기 전에 가림; "post_call"은 응답을 가림
+      size: "medium"        # 선택; variant, labels, sensitivity, redact_mode, model_dir, allow, block 등도 가능
+```
+
+요청에서 `"guardrails": ["newmean-pii"]`로 켜거나 `default_on: true`로 둡니다. 글은 `redact`와 같게 가려집니다
+(`[PERSON]`, `[PHONE]`; 다른 방식은 `redact_mode: "mask"` 또는 `"blank"`). 가린 값은 응답에서 되돌리지 않으며, 위의
+놓침 비율이 그대로 적용됩니다. 제공자가 보는 개인정보를 줄일 뿐, 하나도 새지 않는다고 보장하지는 않습니다.
+
+**Microsoft Presidio**: `presidio-analyzer`용 recognizer입니다. 단독으로도, Presidio의 기본 recognizer와 함께도 씁니다.
+
+```python
+from presidio_analyzer import AnalyzerEngine
+from presidio_anonymizer import AnonymizerEngine
+from newmean_pii.presidio import NewmeanPIIRecognizer
+
+analyzer = AnalyzerEngine()
+analyzer.registry.add_recognizer(NewmeanPIIRecognizer(size="medium"))
+text = "Call Kim Minsu on 010-1234-5678"
+AnonymizerEngine().anonymize(text=text, analyzer_results=analyzer.analyze(text, language="en")).text
+# 'Call <PERSON> on <PHONE_NUMBER>'
+```
+
+레이블은 Presidio에 같은 뜻의 이름이 있으면 그 이름으로 알려 줍니다(`EMAIL` → `EMAIL_ADDRESS`, `PHONE` → `PHONE_NUMBER`,
+`ADDRESS` → `LOCATION`, `ORG` → `ORGANIZATION`; 전체 표는 `ENTITY_MAPPING`, `entity_mapping={...}`으로 바꿈). 모든 결과의
+`score`는 같습니다(기본 0.85). 모델은 점수가 아니라 구간을 돌려주므로, 기준은 `sensitivity`로 옮기세요. Presidio의
+recognizer는 언어 하나만 맡습니다. `recognizers(["en", "ko", "ja"], size="medium")`은 모델 하나를 함께 쓰는 언어별
+recognizer를 돌려줍니다. 분석하는 언어마다 Presidio 자체의 NLP 엔진은 따로 필요합니다.
+
+**Langfuse**: `mask` 함수입니다. 모델이 찾은 개인정보를 뺀 채로 기록이 저장됩니다.
+
+```python
+from langfuse import Langfuse
+from newmean_pii.langfuse import pii_mask
+
+langfuse = Langfuse(mask=pii_mask(size="medium"))
+```
+
+`pii_mask(redactor=None, *, mode="tag", **create_redactor_options)`는 관측 하나의 입력, 출력, 메타데이터 안에 있는
+모든 문자열을 가립니다(dict의 값과 list의 항목, 깊이 제한 없음; 키와 다른 값은 그대로). 모든 관측마다 내 프로세스에서
+돌므로, 기록 양을 생각해 모델 크기를 고르세요.
+
 ## 오프라인 사용
 
 한 번 내려받은 뒤 네트워크 없이 실행합니다.

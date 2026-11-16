@@ -12,6 +12,8 @@
   },
   // Create with `wrangler d1 create pii-site`, then put the database_id it prints here; set up the table with schema.sql.
   "d1_databases": [{ "binding": "DB", "database_name": "pii-site", "database_id": "<your-d1-database-id>" }],
+  // demo speed numbers (/api/demo), read with the Analytics Engine SQL API; the dataset is created on first write
+  "analytics_engine_datasets": [{ "binding": "DEMO", "dataset": "pii_demo_runs" }],
   "routes": [{ "pattern": "pii.newmean.ai", "custom_domain": true }],
   "observability": { "enabled": true }
 }

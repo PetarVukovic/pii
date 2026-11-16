@@ -8,8 +8,8 @@ authors:
     family-names: Lee
     affiliation: newmean.ai
     email: hoonjae@newmean.ai
-version: 1.5.0
-date-released: 2026-11-10
+version: 1.6.0
+date-released: 2026-11-16
 url: "https://github.com/newmean-ai/pii"
 repository-code: "https://github.com/newmean-ai/pii"
 license: Apache-2.0

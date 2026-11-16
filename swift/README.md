@@ -13,7 +13,7 @@ Swift Package Manager: in Xcode, File › Add Package Dependencies… › `https
 `NewmeanPII`. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/newmean-ai/pii", from: "1.5.0"),
+.package(url: "https://github.com/newmean-ai/pii", from: "1.6.0"),
 // target: .product(name: "NewmeanPII", package: "pii")
 ```
 

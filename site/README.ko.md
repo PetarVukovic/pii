@@ -9,6 +9,11 @@
   결과 API `/api/bench`에는 공유 코드(Worker 시크릿 `BENCH_KEY`)가 필요합니다. 끝난 실행은 D1 테이블 `bench_runs`
   (`schema.sql`)에 저장되며, 저장하는 값은 브라우저가 알려 주는 기기 정보와 측정값뿐이고 IP 주소나 다른 요청 메타데이터는
   저장하지 않습니다.
+- `/api/demo`: 데모의 속도 숫자. pii.newmean.ai에서 데모는 페이지를 숨기거나 닫을 때 실행·모델 로딩마다 모델 크기, 엔진,
+  시간, 토큰 수와 대략적인 기기 종류(OS, 브라우저, 폰 여부, CPU 코어, 메모리), 샘플 글인지 여부를 보냅니다. 입력한 글이나
+  찾은 결과는 보내지 않으며, 데모 제목 아래 문구가 이를 알립니다. Worker는 사건마다 Workers Analytics Engine 데이터셋
+  `pii_demo_runs`(바인딩 `DEMO`)에 Cloudflare가 알려 주는 나라와 함께 한 줄씩 쓰고, IP 주소는 저장하지 않습니다. 읽기는
+  Analytics Engine SQL API(Account Analytics: Read 권한 API 토큰)로 합니다.
 
 ## 준비(한 번)
 
@@ -38,3 +43,12 @@ wrangler deploy
 ```bash
 wrangler d1 execute pii-site --remote --command "SELECT created_at, device, size, engine, data FROM bench_runs ORDER BY id"
 ```
+
+각 실행의 `data`에는 측정한 페이지의 SDK 버전(`sdk`)이 들어 있어 릴리스별로 속도를 비교할 수 있습니다(1.5.0 전의 실행에는
+없음).
+
+```bash
+wrangler d1 execute pii-site --remote --command "SELECT json_extract(data, '$.sdk') AS sdk, size, engine, count(*) AS runs FROM bench_runs GROUP BY 1, 2, 3"
+```
+
+데모의 속도 수치에도 들어 있습니다(`pii_demo_runs`의 `blob9`).

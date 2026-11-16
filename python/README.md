@@ -181,6 +181,78 @@ On survey and form exports, table mode misses many names split into first and la
 misses to about a quarter, at 2.3 to 3.7 more points of PII-free cells masked; for recall first, use it. Measurements:
 [repository README](https://github.com/newmean-ai/pii#tables-csv-tsv).
 
+## Integrations
+
+Adapters for LangChain, LiteLLM, Microsoft Presidio and Langfuse: mask personal information before a prompt
+reaches a hosted LLM or before a trace is stored. Every adapter runs the model in your own process, and none of the
+libraries is a dependency of this package (`pip install "newmean-pii[langchain]"`, `"newmean-pii[litellm]"` or
+`"newmean-pii[presidio]"` adds one).
+
+**LangChain** (1.0+): a detector for `PIIMiddleware` that reports every label in one model call.
+
+```python
+from langchain.agents import create_agent
+from newmean_pii.langchain import pii_middleware
+
+agent = create_agent("openai:gpt-6.1", middleware=[pii_middleware(size="medium")])
+# "Call Kim Minsu on 010-1234-5678" reaches the model as "Call [REDACTED_PERSON] on [REDACTED_PHONE]"
+```
+
+`pii_middleware(redactor=None, *, strategy="redact", apply_to_input=True, apply_to_output=False,
+apply_to_tool_results=False, labels=None, name="pii", **create_redactor_options)` returns a `PIIMiddleware`; `strategy`
+is LangChain's (`"redact"`, `"mask"`, `"hash"`, `"block"`). `pii_detector(redactor=None, *, labels=None, **options)`
+returns the detector alone, `(text) -> [{"type", "value", "start", "end"}]` with the label in lower case as `type`, for
+your own `PIIMiddleware(...)` or any code that takes such a function. Without a redactor the model is loaded on the
+first call.
+
+**LiteLLM proxy**: a guardrail that needs no second service. In `config.yaml`:
+
+```yaml
+guardrails:
+  - guardrail_name: "newmean-pii"
+    litellm_params:
+      guardrail: newmean_pii.litellm.NewmeanPIIGuardrail
+      mode: "pre_call"      # mask the request before it is sent; "post_call" masks the response
+      size: "medium"        # optional; also variant, labels, sensitivity, redact_mode, model_dir, allow, block, ...
+```
+
+Requests opt in with `"guardrails": ["newmean-pii"]`, or set `default_on: true`. The text is masked as `redact` does
+(`[PERSON]`, `[PHONE]`; `redact_mode: "mask"` or `"blank"` for the other modes). Masked values are not put back into the
+response, and the miss rates above apply: this lowers what a provider sees, it does not guarantee that nothing gets through.
+
+**Microsoft Presidio**: a recognizer for `presidio-analyzer`, alone or beside Presidio's own recognizers.
+
+```python
+from presidio_analyzer import AnalyzerEngine
+from presidio_anonymizer import AnonymizerEngine
+from newmean_pii.presidio import NewmeanPIIRecognizer
+
+analyzer = AnalyzerEngine()
+analyzer.registry.add_recognizer(NewmeanPIIRecognizer(size="medium"))
+text = "Call Kim Minsu on 010-1234-5678"
+AnonymizerEngine().anonymize(text=text, analyzer_results=analyzer.analyze(text, language="en")).text
+# 'Call <PERSON> on <PHONE_NUMBER>'
+```
+
+Labels are reported under Presidio's entity names where it has one (`EMAIL` → `EMAIL_ADDRESS`, `PHONE` → `PHONE_NUMBER`,
+`ADDRESS` → `LOCATION`, `ORG` → `ORGANIZATION`; the table is `ENTITY_MAPPING`, changed with `entity_mapping={...}`).
+Every result has the same `score` (default 0.85): the model returns spans, not scores, so move its threshold with
+`sensitivity`. A Presidio recognizer serves one language: `recognizers(["en", "ko", "ja"], size="medium")` returns one
+per language on a single model. Presidio itself still needs an NLP engine for each language you analyze.
+
+**Langfuse**: a `mask` function, so traces are stored without the personal information the model finds.
+
+```python
+from langfuse import Langfuse
+from newmean_pii.langfuse import pii_mask
+
+langfuse = Langfuse(mask=pii_mask(size="medium"))
+```
+
+`pii_mask(redactor=None, *, mode="tag", **create_redactor_options)` masks every string in an observation's input, output
+and metadata (dict values and list items at any depth; keys and other values are kept). It runs on every observation in
+your process, so pick the size with your trace volume in mind.
+
 ## Offline use
 
 Download once, then run without network:

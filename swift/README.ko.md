@@ -12,7 +12,7 @@ Swift Package Manager: Xcode에서 File › Add Package Dependencies… › `htt
 `NewmeanPII`. 또는 `Package.swift`에:
 
 ```swift
-.package(url: "https://github.com/newmean-ai/pii", from: "1.5.0"),
+.package(url: "https://github.com/newmean-ai/pii", from: "1.6.0"),
 // target: .product(name: "NewmeanPII", package: "pii")
 ```
 

@@ -31,8 +31,8 @@ const { text, spans } = await redactor.redact("My email is kim@example.com");
 |---|---|---|
 | 瀏覽器、Node.js | [`@newmean-ai/pii`](https://www.npmjs.com/package/@newmean-ai/pii) | `npm install @newmean-ai/pii` |
 | Python 3.9+ | [`newmean-pii`](https://pypi.org/project/newmean-pii/) | `pip install newmean-pii` |
-| iOS 15+、macOS 12+ | `NewmeanPII`（Swift Package Manager） | 加入 `https://github.com/newmean-ai/pii`，版本從 `1.5.0` 起 |
-| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.5.0")` |
+| iOS 15+、macOS 12+ | `NewmeanPII`（Swift Package Manager） | 加入 `https://github.com/newmean-ai/pii`，版本從 `1.6.0` 起 |
+| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
 | Flutter、Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
 
 Python、iOS、Android 與 Flutter 套件透過同一個 C 引擎
@@ -205,6 +205,15 @@ small 與 nano 在每種模式下都會遮蔽許多不含個資的儲存格（16
 因此極少數情況下區段可能不同：在 18,692 篇開發用文字與四種大小上，74,768 個結果中有 1 個不同。arm64 上的結果現在與 npm 套件的
 relaxed-SIMD 版本（Chrome、Edge、Firefox）相同，不再與 x86-64 逐位元相同（x86-64 沒有任何變更）；以 `PII_NO_FMA` 建置核心即可沿用
 1.4 的運算核心（[native/core](native/core/README.md#build)）。npm 套件得到與 1.4.1 相同的區段。
+
+1.6 的新增。SDK 1.6.0，沿用相同的 v1.1 模型；僅新增整合用的轉接器，`detect` 與 `redact` 的結果與 1.5.0 相同。Python 套件新增
+`newmean_pii.langchain`（供 LangChain 1.0 以上使用的偵測器與現成的 `PIIMiddleware`）、`newmean_pii.litellm`（在 LiteLLM
+proxy 內遮蔽請求或回應的 guardrail，不需另外架設服務）、`newmean_pii.presidio`（Microsoft Presidio 的 recognizer，以單一模型
+為每種語言各建一個）與 `newmean_pii.langfuse`（用於追蹤紀錄的 `mask` 函式）；npm 套件新增 `@newmean-ai/pii/ai-sdk`（Vercel AI
+SDK 的 language model middleware）與 `@newmean-ai/pii/langchain`（LangChain.js 的 agent middleware）。這些函式庫都不是相依
+套件：Python 以 extras `[langchain]`、`[litellm]`、`[presidio]` 一併安裝，`langchain` 則是 npm 套件的選用 peer 相依。轉接器
+會遮蔽送出或儲存的文字，不會在回應中還原原值。說明：[python/README.md](python/README.md#integrations)、
+[js/README.md](js/README.md#vercel-ai-sdk)。Swift、Android 與 Flutter 套件僅更新版本號。
 
 ## 儲存庫結構
 

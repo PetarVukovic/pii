@@ -16,7 +16,7 @@ export interface LoadOptions {
   onProgress?: (p: Progress) => void;
 }
 
-const CACHE_NAME = "newmean-pii-models";
+export const CACHE_NAME = "newmean-pii-models"; // also read by playground/build.mjs
 
 async function sha256(bytes: Uint8Array): Promise<string | null> {
   const subtle = globalThis.crypto?.subtle;

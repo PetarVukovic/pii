@@ -185,6 +185,53 @@ On survey and form exports, table mode misses many names split into first and la
 the misses to about a quarter, at 2.3 to 3.7 more points of PII-free cells masked; for recall first, use it. Measurements:
 [repository README](https://github.com/newmean-ai/pii#tables-csv-tsv).
 
+## Vercel AI SDK
+
+Mask the prompt before it reaches a hosted model. `@newmean-ai/pii/ai-sdk` is a language model middleware; the `ai`
+package is not a dependency of this one.
+
+```ts
+import { generateText, wrapLanguageModel } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { piiMiddleware } from "@newmean-ai/pii/ai-sdk";
+
+const model = wrapLanguageModel({ model: openai("gpt-6.1"), middleware: piiMiddleware() });
+await generateText({ model, prompt: "Call Kim Minsu on 010-1234-5678" });
+// the provider receives "Call [PERSON] on [PHONE]"
+```
+
+```ts
+piiMiddleware({
+  redactor,                    // a Redactor you already have (or its promise); default: created on the first call
+  create: { size: "medium" },  // createRedactor options when no redactor is given
+  roles: ["user"],             // roles to mask: "user" (default), "system", "assistant", "tool" (text tool results only)
+  redact: { mode: "tag" },     // as in redact(): "tag", "mask", "blank" or replace
+  specificationVersion: "v3",  // default "v3" (AI SDK 6 and 7); "v2" for AI SDK 5
+});
+```
+
+It works with `generateText`, `streamText` and agents alike, because it changes only the call's prompt, and it remembers
+the last 256 texts, so the unchanged history of a conversation is masked once. Masked values are not put back into the
+response, and no model finds everything: this lowers what a provider sees, it does not guarantee that nothing gets through.
+
+## LangChain.js
+
+`@newmean-ai/pii/langchain` is an agent middleware for `langchain` 1.0+ (an optional peer dependency, needed only for
+this entry).
+
+```ts
+import { createAgent } from "langchain";
+import { piiMiddleware } from "@newmean-ai/pii/langchain";
+
+const agent = createAgent({ model: "openai:gpt-6.1", middleware: [piiMiddleware()] });
+// "Call Kim Minsu on 010-1234-5678" reaches the model as "Call [PERSON] on [PHONE]"
+```
+
+`piiMiddleware({ redactor, create, roles, redact })` takes the options of the AI SDK middleware above; `roles` are
+`"user"` (default), `"tool"` and `"assistant"`. It wraps the model call, so the model gets masked copies and the agent's
+state keeps the messages as written. (LangChain's own `piiMiddleware` takes a synchronous detector, which an asynchronous
+model call cannot be, so this is a middleware of its own.)
+
 ## Development
 
 ```bash

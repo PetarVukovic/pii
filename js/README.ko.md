@@ -139,6 +139,53 @@ await redactor.redactTable(tsv, { delimiter: "\t", vote: false }, { mode: "mask"
 줄고, 개인정보가 없는 칸은 2.3~3.7점 더 가립니다. 재현율이 먼저라면 이 옵션을 쓰세요. 측정값:
 [저장소 README](https://github.com/newmean-ai/pii/blob/main/README.ko.md#표csv-tsv).
 
+## Vercel AI SDK
+
+프롬프트가 외부 모델에 가기 전에 가립니다. `@newmean-ai/pii/ai-sdk`는 language model middleware이며, `ai` 패키지는
+이 패키지의 의존성이 아닙니다.
+
+```ts
+import { generateText, wrapLanguageModel } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { piiMiddleware } from "@newmean-ai/pii/ai-sdk";
+
+const model = wrapLanguageModel({ model: openai("gpt-6.1"), middleware: piiMiddleware() });
+await generateText({ model, prompt: "김민수에게 010-1234-5678로 전화해 줘" });
+// 제공자는 "[PERSON]에게 [PHONE]로 전화해 줘"를 받습니다
+```
+
+```ts
+piiMiddleware({
+  redactor,                    // 이미 만든 Redactor(또는 그 promise); 기본: 첫 호출 때 만듦
+  create: { size: "medium" },  // redactor를 주지 않을 때 createRedactor에 넘길 옵션
+  roles: ["user"],             // 가릴 역할: "user"(기본), "system", "assistant", "tool"(글로 된 도구 결과만)
+  redact: { mode: "tag" },     // redact()와 같음: "tag", "mask", "blank" 또는 replace
+  specificationVersion: "v3",  // 기본 "v3"(AI SDK 6, 7); AI SDK 5는 "v2"
+});
+```
+
+호출의 프롬프트만 바꾸므로 `generateText`, `streamText`, 에이전트에서 똑같이 동작하고, 최근 글 256개를 기억해 대화에서
+바뀌지 않은 앞부분은 한 번만 가립니다. 가린 값은 응답에서 되돌리지 않으며, 어떤 모델도 전부 찾지는 못합니다. 제공자가
+보는 개인정보를 줄일 뿐, 하나도 새지 않는다고 보장하지는 않습니다.
+
+## LangChain.js
+
+`@newmean-ai/pii/langchain`은 `langchain` 1.0 이상용 에이전트 미들웨어입니다(`langchain`은 이 진입점에만 필요한 선택
+peer 의존성).
+
+```ts
+import { createAgent } from "langchain";
+import { piiMiddleware } from "@newmean-ai/pii/langchain";
+
+const agent = createAgent({ model: "openai:gpt-6.1", middleware: [piiMiddleware()] });
+// "김민수에게 010-1234-5678로 전화해 줘"는 모델에 "[PERSON]에게 [PHONE]로 전화해 줘"로 갑니다
+```
+
+`piiMiddleware({ redactor, create, roles, redact })`의 옵션은 위 AI SDK 미들웨어와 같고, `roles`는 `"user"`(기본),
+`"tool"`, `"assistant"`입니다. 모델 호출을 감싸므로 모델은 가린 사본을 받고, 에이전트의 상태에는 쓴 그대로의 메시지가
+남습니다. (LangChain의 `piiMiddleware`는 동기 탐지기만 받는데 이 패키지의 모델 호출은 비동기라서, 별도 미들웨어로
+만들었습니다.)
+
 ## 개발
 
 ```bash
