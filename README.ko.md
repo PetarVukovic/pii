@@ -215,7 +215,8 @@ Swift, Android, Flutter 패키지는 버전 번호만 바뀝니다.
 Rust crate와 C 코어에는 이 계층이 없습니다. 패키지마다 구조 문자 6개로 만든 7자 이하의 모든 문자열과 무작위 유니코드
 문자열에서 새 매처를 옛 매처와 대조합니다. Joonho Lee 님이 비공개로 제보해 주셨습니다. Python 패키지에서는 LiteLLM
 가드레일이 config.yaml에 적은 `allow`와 `block` 항목도 받습니다. 1.6.0 뒤에 추가한 Rust crate
-[`newmean-pii`](rust/README.ko.md)도 같은 버전을 따릅니다.
+[`newmean-pii`](rust/README.ko.md)도 같은 버전을 따릅니다. npm에서는 1.6.2를 쓰세요. npm의 1.6.1은 빌드된 파일 없이 올라가
+import할 수 없습니다. 1.6.2는 같은 코드를 빌드해 올린 것이고, 이제 빌드된 파일이 없으면 게시가 거부됩니다.
 
 ## 저장소 구성
 

@@ -228,7 +228,9 @@ now about 1 ms in Python and 0.05 ms in npm). The npm, Python, Swift, Android an
 this layer. Each package checks the new matcher against the old one on every string of up to 7 characters over six
 structural characters and on random Unicode strings. Reported privately by Joonho Lee. Also in the Python package: the
 LiteLLM guardrail accepts `allow` and `block` entries written in config.yaml. The Rust crate
-[`newmean-pii`](rust/README.md), added after 1.6.0, follows the version.
+[`newmean-pii`](rust/README.md), added after 1.6.0, follows the version. On npm use 1.6.2: 1.6.1 was published there
+without its built files and cannot be imported; 1.6.2 is the same code, built, and publishing now refuses a package
+without them.
 
 ## Repository layout
 
