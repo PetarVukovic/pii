@@ -220,7 +220,7 @@ SDK 的 language model middleware）與 `@newmean-ai/pii/langchain`（LangChain.
 時，處理時間會隨輸入長度的平方成長：EMAIL 樣式會從一長串不含「@」的字元中的每個字元重新嘗試，而且每個比對結果都與先前所有
 結果逐一比較，因此直接傳入外部長文字的服務可能被長時間佔用（32,000 個字母在 npm 套件需 0.5 秒、Python 需 2 秒，現在 Python 約
 1 毫秒、npm 0.05 毫秒）。npm、Python、Swift、Android 與 Flutter 套件已修正；Rust crate 與 C 核心沒有這一層。每個套件都以六個結構字元組成的
-7 個字元以內的所有字串，以及隨機 Unicode 字串，將新的比對器與舊的逐一對照。由 Joonho Lee 私下通報。Python 套件另外修正：
+7 個字元以內的所有字串，以及隨機 Unicode 字串，將新的比對器與舊的逐一對照。由 @whatisyourname0（Joonho Lee）私下通報。Python 套件另外修正：
 LiteLLM guardrail 接受寫在 config.yaml 的 `allow` 與 `block` 項目。1.6.0 之後加入的 Rust crate
 [`newmean-pii`](rust/README.md) 也採用相同版本。npm 請使用 1.6.2：npm 上的 1.6.1 發佈時缺少建置後的檔案，無法匯入；
 1.6.2 是同一份程式碼建置後的版本，現在缺少建置檔案時會拒絕發佈。
