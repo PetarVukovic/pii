@@ -83,10 +83,17 @@ void main() {
     final bad = <String>[];
     for (var length = 0; length <= 7; length++) {
       for (final t in texts) {
-        if (current(t).join(' ') != legacy(t).join(' ')) bad.add(t);
+        if (current(t).join(' ') != legacy(t).join(' ')) {
+          bad.add(t);
+        }
       }
       checked += texts.length;
-      if (length < 7) texts = [for (final t in texts) for (final c in alphabet) t + c];
+      if (length < 7) {
+        texts = [
+          for (final t in texts)
+            for (final c in alphabet) t + c,
+        ];
+      }
     }
     expect(bad.take(5).toList(), isEmpty);
     expect(checked, 335923);
@@ -94,9 +101,40 @@ void main() {
 
   test('regexSpans equals the 1.6.0 matcher on 40,000 random Unicode strings', () {
     final alphabet = [
-      'a', 'Z', '7', '@', '@', '.', '.', '+', '-', '_', ' ', '\n', '\u00a0', '한', 'é', '\u{10400}', '\u{1D7D9}', '①', '\u0301',
-      '\u{1F600}', String.fromCharCode(0xD800), String.fromCharCode(0xDC00), ':', '/', '(', ')', 'w', '0', '1', 'http://', 'www.',
-      '\u000B', '\u0085', '\uFEFF',
+      'a',
+      'Z',
+      '7',
+      '@',
+      '@',
+      '.',
+      '.',
+      '+',
+      '-',
+      '_',
+      ' ',
+      '\n',
+      '\u00a0',
+      '한',
+      'é',
+      '\u{10400}',
+      '\u{1D7D9}',
+      '①',
+      '\u0301',
+      '\u{1F600}',
+      String.fromCharCode(0xD800),
+      String.fromCharCode(0xDC00),
+      ':',
+      '/',
+      '(',
+      ')',
+      'w',
+      '0',
+      '1',
+      'http://',
+      'www.',
+      '\u000B',
+      '\u0085',
+      '\uFEFF',
     ];
     var state = 20261117;
     int random(int limit) {
@@ -118,11 +156,23 @@ void main() {
 
   test('regexSpans equals the 1.6.0 matcher on edge cases', () {
     final cases = [
-      'a@b.co@d.e', 'a@b.co-+x@c.de', 'a@b..co', 'a@@b.co', 'a@b.co.', '.a+@b.co', 'a@b', '@b.co', 'a@.co', 'a@b.c@d.e.f',
-      '😀 김+\u{10400}@회사.한국 \u{1D7D9}@\u{10400}.한', 'e\u0301@a.co ①@b.co a@b.①',
+      'a@b.co@d.e',
+      'a@b.co-+x@c.de',
+      'a@b..co',
+      'a@@b.co',
+      'a@b.co.',
+      '.a+@b.co',
+      'a@b',
+      '@b.co',
+      'a@.co',
+      'a@b.c@d.e.f',
+      '😀 김+\u{10400}@회사.한국 \u{1D7D9}@\u{10400}.한',
+      'e\u0301@a.co ①@b.co a@b.①',
       'a${String.fromCharCode(0xD800)}@b.co a@b.${String.fromCharCode(0xDC00)}',
-      'www.site.test/x@y.co 010-1234-5678 https://other.test', 'a@b.co http://one.test a@b.co',
-      '900101-1234567 4111 1111 1111 1111 +1 (212) 555-1234', 'https://a@b.co/x?mail=c@d.co',
+      'www.site.test/x@y.co 010-1234-5678 https://other.test',
+      'a@b.co http://one.test a@b.co',
+      '900101-1234567 4111 1111 1111 1111 +1 (212) 555-1234',
+      'https://a@b.co/x?mail=c@d.co',
     ];
     for (final t in cases) {
       expect(current(t), legacy(t), reason: t);
