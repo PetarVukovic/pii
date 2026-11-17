@@ -1,0 +1,74 @@
+# Rust crate newmean-pii (rust/, compiles native/core): tests on Linux (x86-64 and arm64), macOS and Windows with the nano
+# and medium models downloaded from Hugging Face, the minimum supported Rust version, and a build of the crate as
+# published (with the core vendored). The parity tests against the other packages are run by hand: their fixtures are private.
+name: rust
+
+on:
+  push:
+    branches: [main]
+    paths: [rust/**, native/core/**, .github/workflows/rust.yml]
+  pull_request:
+    paths: [rust/**, native/core/**, .github/workflows/rust.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # on push only in the public repository; other copies of it run these by hand (workflow_dispatch)
+    if: github.repository == 'newmean-ai/pii' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustc --version && cargo --version
+      # the two models the tests use (3.4 MB and 12.1 MB with their tokenizers), checked against the pins when loaded
+      - name: Download models
+        run: |
+          for m in "nano q4" "medium q4e"; do
+            set -- $m
+            base=https://huggingface.co/newmean-ai/pii-$1/resolve/v1.1.0
+            mkdir -p "$RUNNER_TEMP/models/pii-$1/onnx"
+            curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o "$RUNNER_TEMP/models/pii-$1/tokenizer.web.json" $base/tokenizer.web.json
+            curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o "$RUNNER_TEMP/models/pii-$1/onnx/model_$2.onnx" $base/onnx/model_$2.onnx
+          done
+          echo "PII_MODELS=$RUNNER_TEMP/models" >> "$GITHUB_ENV"
+      # a test that does not find its model prints "skipped: no ..." and passes, so that line fails the job here
+      - name: Test
+        run: |
+          set -o pipefail
+          cargo test -- --nocapture 2>&1 | tee "$RUNNER_TEMP/test.log"
+          ! grep -q "skipped: no" "$RUNNER_TEMP/test.log"
+      - run: cargo run --release --example extract -- "$PII_MODELS/pii-medium" "Call Maria Lopez on +1 415 555 0142"
+
+  msrv:
+    if: github.repository == 'newmean-ai/pii' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install 1.70.0 --profile minimal
+      - run: cargo +1.70.0 check --lib
+
+  package:
+    if: github.repository == 'newmean-ai/pii' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
+      # the crate as crates.io gets it: the core copied into native-core/, then built from the packaged files alone
+      - run: tool/vendor_core.sh && cargo package --allow-dirty

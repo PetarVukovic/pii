@@ -34,6 +34,7 @@ const { text, spans } = await redactor.redact("My email is kim@example.com");
 | iOS 15+、macOS 12+ | `NewmeanPII`（Swift Package Manager） | 加入 `https://github.com/newmean-ai/pii`，版本從 `1.6.0` 起 |
 | Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
 | Flutter、Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
+| Rust | [`newmean-pii`](https://crates.io/crates/newmean-pii) | `cargo add newmean-pii` |
 
 Python、iOS、Android 與 Flutter 套件透過同一個 C 引擎
 （[`native/core`](native/core)）在裝置上執行相同的模型，其詞元 ID、偏移量與 logits 均與 npm 套件一致。模型檔案會從 Hugging Face 下載一次，
@@ -63,7 +64,7 @@ import 'package:newmean_pii/newmean_pii.dart';
 final r = await (await NewmeanPii.create(size: 'medium')).redact('My email is kim@example.com');
 ```
 
-指南：[Python](python/README.md) · [Swift](swift/README.md) · [Android](android/README.md) · [Flutter](flutter/README.md)
+指南：[Python](python/README.md) · [Swift](swift/README.md) · [Android](android/README.md) · [Flutter](flutter/README.md) · [Rust](rust/README.md)
 
 ### 表格（CSV、TSV）
 
@@ -225,6 +226,7 @@ SDK 的 language model middleware）與 `@newmean-ai/pii/langchain`（LangChain.
 | [`swift/`](swift)、`Package.swift` | Swift 套件 `NewmeanPII`（iOS、macOS） |
 | [`android/`](android) | Android 函式庫 `ai.newmean:pii` |
 | [`flutter/`](flutter) | Flutter 與 Dart 套件 `newmean_pii` |
+| [`rust/`](rust) | Rust crate `newmean-pii` |
 | [`docs/report/`](docs/report) | 技術報告與其兩份附錄（亦提供韓文版） |
 | [`leaderboard/`](leaderboard) | Hugging Face 排行榜 Space 的程式碼 |
 | [`site/`](site) | 在 pii.newmean.ai 提供示範與手機效能測試的 Worker |

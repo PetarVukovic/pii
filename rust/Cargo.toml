@@ -1,0 +1,21 @@
+[package]
+name = "newmean-pii"
+version = "1.6.0"
+edition = "2021"
+rust-version = "1.70"
+description = "On-device PII detection, masking and extraction in 54 languages: small models (2.6 to 15.5 MB) that run inside your process, no service and no API key."
+license = "Apache-2.0"
+repository = "https://github.com/newmean-ai/pii"
+homepage = "https://github.com/newmean-ai/pii/tree/main/rust"
+documentation = "https://docs.rs/newmean-pii"
+readme = "README.md"
+keywords = ["pii", "privacy", "redaction", "anonymization", "nlp"]
+categories = ["text-processing", "science"]
+# With `include`, cargo does not read .gitignore, so the vendored core (native-core/, ignored by git) is packaged.
+include = ["/src/**", "/build.rs", "/native-core/**", "/examples/extract.rs", "/tests/**", "/README.md", "/README.ko.md", "/LICENSE", "/NOTICE"]
+
+[lib]
+name = "newmean_pii"
+
+[build-dependencies]
+cc = "1"

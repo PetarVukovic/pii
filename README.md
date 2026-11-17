@@ -34,6 +34,7 @@ See [js/README.md](js/README.md) for the full API.
 | iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | add `https://github.com/newmean-ai/pii`, from `1.6.0` |
 | Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
 | Flutter, Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
+| Rust | [`newmean-pii`](https://crates.io/crates/newmean-pii) | `cargo add newmean-pii` |
 
 The Python, iOS, Android and Flutter packages run the same models on the device through one C engine
 ([`native/core`](native/core)), whose token ids, offsets and logits equal the npm package's. Model files are downloaded once
@@ -63,7 +64,7 @@ import 'package:newmean_pii/newmean_pii.dart';
 final r = await (await NewmeanPii.create(size: 'medium')).redact('My email is kim@example.com');
 ```
 
-Guides: [Python](python/README.md) · [Swift](swift/README.md) · [Android](android/README.md) · [Flutter](flutter/README.md)
+Guides: [Python](python/README.md) · [Swift](swift/README.md) · [Android](android/README.md) · [Flutter](flutter/README.md) · [Rust](rust/README.md)
 
 ### Tables (CSV, TSV)
 
@@ -229,6 +230,7 @@ and Flutter packages change only their version number.
 | [`swift/`](swift), `Package.swift` | the Swift package `NewmeanPII` (iOS, macOS) |
 | [`android/`](android) | the Android library `ai.newmean:pii` |
 | [`flutter/`](flutter) | the Flutter and Dart package `newmean_pii` |
+| [`rust/`](rust) | the Rust crate `newmean-pii` |
 | [`docs/report/`](docs/report) | the technical report and its two appendices (also in Korean) |
 | [`leaderboard/`](leaderboard) | code of the leaderboard Space on Hugging Face |
 | [`site/`](site) | the Worker that serves the demo and the phone benchmark at pii.newmean.ai |

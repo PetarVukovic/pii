@@ -34,6 +34,7 @@ const { text, spans } = await redactor.redact("My email is kim@example.com");
 | iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | `https://github.com/newmean-ai/pii` 추가, `1.6.0`부터 |
 | Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
 | Flutter, Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
+| Rust | [`newmean-pii`](https://crates.io/crates/newmean-pii) | `cargo add newmean-pii` |
 
 Python, iOS, Android, Flutter 패키지는 같은 모델을 기기에서 C 엔진 하나([`native/core`](native/core))로 실행하며, 토큰 id·오프셋·
 로짓이 npm 패키지와 같습니다. 모델 파일은 Hugging Face에서 한 번 내려받아 고정된 SHA-256으로 검사하거나, 앱에 함께 넣습니다.
@@ -62,7 +63,7 @@ import 'package:newmean_pii/newmean_pii.dart';
 final r = await (await NewmeanPii.create(size: 'medium')).redact('제 메일은 kim@example.com입니다');
 ```
 
-안내: [Python](python/README.ko.md) · [Swift](swift/README.ko.md) · [Android](android/README.ko.md) · [Flutter](flutter/README.ko.md)
+안내: [Python](python/README.ko.md) · [Swift](swift/README.ko.md) · [Android](android/README.ko.md) · [Flutter](flutter/README.ko.md) · [Rust](rust/README.ko.md)
 
 ### 표(CSV, TSV)
 
@@ -217,6 +218,7 @@ Swift, Android, Flutter 패키지는 버전 번호만 바뀝니다.
 | [`swift/`](swift), `Package.swift` | Swift 패키지 `NewmeanPII`(iOS, macOS) |
 | [`android/`](android) | Android 라이브러리 `ai.newmean:pii` |
 | [`flutter/`](flutter) | Flutter·Dart 패키지 `newmean_pii` |
+| [`rust/`](rust) | Rust crate `newmean-pii` |
 | [`docs/report/`](docs/report) | 기술 보고서와 부록 두 개(한국어판 포함) |
 | [`leaderboard/`](leaderboard) | Hugging Face의 리더보드 Space 코드 |
 | [`site/`](site) | pii.newmean.ai에서 데모와 휴대폰 벤치마크를 제공하는 Worker |

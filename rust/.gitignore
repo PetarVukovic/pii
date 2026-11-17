@@ -1,0 +1,4 @@
+target/
+Cargo.lock
+# made by tool/vendor_core.sh for publishing only (the source of truth is ../native/core)
+native-core/
