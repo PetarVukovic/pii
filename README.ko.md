@@ -31,8 +31,8 @@ const { text, spans } = await redactor.redact("My email is kim@example.com");
 |---|---|---|
 | 브라우저, Node.js | [`@newmean-ai/pii`](https://www.npmjs.com/package/@newmean-ai/pii) | `npm install @newmean-ai/pii` |
 | Python 3.9+ | [`newmean-pii`](https://pypi.org/project/newmean-pii/) | `pip install newmean-pii` |
-| iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | `https://github.com/newmean-ai/pii` 추가, `1.6.0`부터 |
-| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
+| iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | `https://github.com/newmean-ai/pii` 추가, `1.6.1`부터 |
+| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.1")` |
 | Flutter, Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
 | Rust | [`newmean-pii`](https://crates.io/crates/newmean-pii) | `cargo add newmean-pii` |
 
@@ -207,6 +207,15 @@ Presidio용 recognizer, 모델 하나로 언어마다 하나씩), `newmean_pii.l
 함께 설치하고, npm 패키지에서 `langchain`은 선택 peer 의존성입니다. 어댑터는 보내거나 저장하는 글을 가리며, 응답에서 값을
 되돌리지는 않습니다. 안내: [python/README.ko.md](python/README.ko.md#통합), [js/README.ko.md](js/README.ko.md#vercel-ai-sdk).
 Swift, Android, Flutter 패키지는 버전 번호만 바뀝니다.
+
+1.6.1에서 고친 것. SDK 1.6.1이며 모델은 v1.1 그대로이고 결과 구간도 같습니다. 패턴 계층을 켰거나(`regex: true`, 기본은 꺼짐)
+`regexSpans`를 직접 부를 때 처리 시간이 입력 길이의 제곱으로 늘었습니다. "@" 없는 긴 글자열의 글자마다 EMAIL 패턴을 다시
+시도했고, 매치마다 앞선 결과 전체와 비교했기 때문입니다. 밖에서 받은 긴 글을 그대로 넘기는 서비스는 오래 붙잡힐 수
+있었습니다(글자 32,000개에 npm 0.5초, Python 2초, 지금은 Python 약 1 ms, npm 0.05 ms). npm, Python, Swift, Android, Flutter 패키지를 고쳤고,
+Rust crate와 C 코어에는 이 계층이 없습니다. 패키지마다 구조 문자 6개로 만든 7자 이하의 모든 문자열과 무작위 유니코드
+문자열에서 새 매처를 옛 매처와 대조합니다. Joonho Lee 님이 비공개로 제보해 주셨습니다. Python 패키지에서는 LiteLLM
+가드레일이 config.yaml에 적은 `allow`와 `block` 항목도 받습니다. 1.6.0 뒤에 추가한 Rust crate
+[`newmean-pii`](rust/README.ko.md)도 같은 버전을 따릅니다.
 
 ## 저장소 구성
 

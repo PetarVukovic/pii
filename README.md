@@ -31,8 +31,8 @@ See [js/README.md](js/README.md) for the full API.
 |---|---|---|
 | Browser, Node.js | [`@newmean-ai/pii`](https://www.npmjs.com/package/@newmean-ai/pii) | `npm install @newmean-ai/pii` |
 | Python 3.9+ | [`newmean-pii`](https://pypi.org/project/newmean-pii/) | `pip install newmean-pii` |
-| iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | add `https://github.com/newmean-ai/pii`, from `1.6.0` |
-| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
+| iOS 15+, macOS 12+ | `NewmeanPII` (Swift Package Manager) | add `https://github.com/newmean-ai/pii`, from `1.6.1` |
+| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.1")` |
 | Flutter, Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
 | Rust | [`newmean-pii`](https://crates.io/crates/newmean-pii) | `cargo add newmean-pii` |
 
@@ -219,6 +219,16 @@ dependency: the Python extras `[langchain]`, `[litellm]` and `[presidio]` add th
 dependency of the npm package. The adapters mask what is sent or stored and do not put the values back into a response.
 Guides: [python/README.md](python/README.md#integrations), [js/README.md](js/README.md#vercel-ai-sdk). The Swift, Android
 and Flutter packages change only their version number.
+
+What 1.6.1 fixes. SDK 1.6.1, same v1.1 models and the same spans. With the pattern layer on (`regex: true`, off by
+default) or in a direct call of `regexSpans`, the time grew with the square of the input: the EMAIL pattern was tried
+again from every character of a long run without "@", and every match was compared with all earlier ones, so a service
+that passes long text from outside could be kept busy (32,000 letters took 0.5 s in the npm package and 2 s in Python;
+now about 1 ms in Python and 0.05 ms in npm). The npm, Python, Swift, Android and Flutter packages are fixed; the Rust crate and the C core never had
+this layer. Each package checks the new matcher against the old one on every string of up to 7 characters over six
+structural characters and on random Unicode strings. Reported privately by Joonho Lee. Also in the Python package: the
+LiteLLM guardrail accepts `allow` and `block` entries written in config.yaml. The Rust crate
+[`newmean-pii`](rust/README.md), added after 1.6.0, follows the version.
 
 ## Repository layout
 

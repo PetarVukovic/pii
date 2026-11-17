@@ -20,6 +20,14 @@ public enum PIIRegex {
     (.phone, "(?:\\+\(d){1,3}[\(space)\\-]?)?\\(?\(d){2,4}\\)?[\(space).\\-]?\(d){3,4}[\(space).\\-]?\(d){4}\(b1)"),
   ]
 
+  private static let emailLocal = #"[\p{L}\p{N}_.+\-]+"#
+  private static let emailDomain = #"@[\p{L}\p{N}_\-]+(?:\.[\p{L}\p{N}_\-]+)+"#
+  /// The EMAIL rule as `spans(in:)` runs it: the domain is optional, so a run of local-part characters without an address
+  /// after it is consumed as one match (and dropped) instead of being tried again from each of its characters, which took
+  /// time quadratic in the length of the run. The matches with a domain are exactly those of the EMAIL rule: an address
+  /// starts where its run of local-part characters starts (or where the previous match ended) in both.
+  private static let emailLinear = try! NSRegularExpression(pattern: "\(emailLocal)(\(emailDomain))?")
+
   private static let compiled: [(PIILabel, NSRegularExpression)] = rules.map {
     ($0.label, try! NSRegularExpression(pattern: $0.pattern))  // constant patterns, checked by the tests
   }
@@ -29,12 +37,36 @@ public enum PIIRegex {
     let ns = text as NSString
     let all = NSRange(location: 0, length: ns.length)
     var out: [(label: PIILabel, range: Range<Int>)] = []
+    // the matches accepted so far in text order (they never overlap), so each rule checks its matches against them in
+    // one pass instead of comparing every match with every earlier one
+    var taken: [(label: PIILabel, range: Range<Int>)] = []
     for (label, re) in compiled {
-      for m in re.matches(in: text, range: all) {
+      let email = label == .email
+      var added: [(label: PIILabel, range: Range<Int>)] = []
+      var i = 0
+      for m in (email ? emailLinear : re).matches(in: text, range: all) {
+        if email && m.range(at: 1).location == NSNotFound { continue }
         let r = m.range.location..<(m.range.location + m.range.length)
-        if out.contains(where: { r.overlaps($0.range) }) { continue }
-        out.append((label, r))
+        while i < taken.count && taken[i].range.upperBound <= r.lowerBound { i += 1 }
+        if i < taken.count && taken[i].range.lowerBound < r.upperBound { continue }
+        added.append((label, r))
       }
+      if added.isEmpty { continue }
+      out.append(contentsOf: added)
+      var merged: [(label: PIILabel, range: Range<Int>)] = []
+      merged.reserveCapacity(taken.count + added.count)
+      var a = 0
+      var b = 0
+      while a < taken.count || b < added.count {
+        if b >= added.count || (a < taken.count && taken[a].range.lowerBound < added[b].range.lowerBound) {
+          merged.append(taken[a])
+          a += 1
+        } else {
+          merged.append(added[b])
+          b += 1
+        }
+      }
+      taken = merged
     }
     return out
   }

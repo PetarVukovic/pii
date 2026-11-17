@@ -74,6 +74,9 @@ def test_litellm_guardrail_options():
     g = NewmeanPIIGuardrail(size="nano", labels=["EMAIL"], sensitivity=0.2, guardrail_name="g", event_hook="pre_call")
     assert g._args == ("nano", None) and g._options == {"sensitivity": 0.2, "labels": ["EMAIL"]}
     assert g.guardrail_name == "g"
+    # allow / block as YAML writes them: [text, label] lists become the tuples create_redactor takes
+    g = NewmeanPIIGuardrail(allow=["Seoul", ["Jeju", "ADDRESS"]], block=[["Bluebird", "ORG"]], guardrail_name="g", event_hook="pre_call")
+    assert g._options == {"allow": ["Seoul", ("Jeju", "ADDRESS")], "block": [("Bluebird", "ORG")]}
 
 
 def test_presidio_recognizer(nano):

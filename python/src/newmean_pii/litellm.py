@@ -51,6 +51,9 @@ class NewmeanPIIGuardrail(CustomGuardrail):
         if redact_mode not in ("tag", "mask", "blank"):
             raise ValueError(f'redact_mode must be "tag", "mask" or "blank", not {redact_mode!r}')
         options = {k: kwargs.pop(k) for k in self._OPTIONS if k in kwargs}
+        for key in ("allow", "block"):  # config.yaml gives [text, label] lists; the lists take (text, label) tuples
+            if isinstance(options.get(key), list):
+                options[key] = [tuple(e) if isinstance(e, list) else e for e in options[key]]
         if labels is not None:
             options["labels"] = list(labels)
         self._args = (size, variant)

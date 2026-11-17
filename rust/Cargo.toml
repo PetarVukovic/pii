@@ -1,6 +1,6 @@
 [package]
 name = "newmean-pii"
-version = "1.6.0"
+version = "1.6.1"
 edition = "2021"
 rust-version = "1.70"
 description = "On-device PII detection, masking and extraction in 54 languages: small models (2.6 to 15.5 MB) that run inside your process, no service and no API key."

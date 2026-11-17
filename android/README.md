@@ -12,7 +12,7 @@ device; nothing is sent anywhere.
 ```kotlin
 // build.gradle.kts of the app module
 dependencies {
-    implementation("ai.newmean:pii:1.6.0")
+    implementation("ai.newmean:pii:1.6.1")
 }
 ```
 

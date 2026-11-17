@@ -31,8 +31,8 @@ const { text, spans } = await redactor.redact("My email is kim@example.com");
 |---|---|---|
 | 瀏覽器、Node.js | [`@newmean-ai/pii`](https://www.npmjs.com/package/@newmean-ai/pii) | `npm install @newmean-ai/pii` |
 | Python 3.9+ | [`newmean-pii`](https://pypi.org/project/newmean-pii/) | `pip install newmean-pii` |
-| iOS 15+、macOS 12+ | `NewmeanPII`（Swift Package Manager） | 加入 `https://github.com/newmean-ai/pii`，版本從 `1.6.0` 起 |
-| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.0")` |
+| iOS 15+、macOS 12+ | `NewmeanPII`（Swift Package Manager） | 加入 `https://github.com/newmean-ai/pii`，版本從 `1.6.1` 起 |
+| Android 7.0+ | [`ai.newmean:pii`](https://central.sonatype.com/artifact/ai.newmean/pii) | `implementation("ai.newmean:pii:1.6.1")` |
 | Flutter、Dart | [`newmean_pii`](https://pub.dev/packages/newmean_pii) | `flutter pub add newmean_pii` |
 | Rust | [`newmean-pii`](https://crates.io/crates/newmean-pii) | `cargo add newmean-pii` |
 
@@ -215,6 +215,14 @@ SDK 的 language model middleware）與 `@newmean-ai/pii/langchain`（LangChain.
 套件：Python 以 extras `[langchain]`、`[litellm]`、`[presidio]` 一併安裝，`langchain` 則是 npm 套件的選用 peer 相依。轉接器
 會遮蔽送出或儲存的文字，不會在回應中還原原值。說明：[python/README.md](python/README.md#integrations)、
 [js/README.md](js/README.md#vercel-ai-sdk)。Swift、Android 與 Flutter 套件僅更新版本號。
+
+1.6.1 的修正。SDK 1.6.1，沿用相同的 v1.1 模型，結果區段也相同。開啟樣式層（`regex: true`，預設關閉）或直接呼叫 `regexSpans`
+時，處理時間會隨輸入長度的平方成長：EMAIL 樣式會從一長串不含「@」的字元中的每個字元重新嘗試，而且每個比對結果都與先前所有
+結果逐一比較，因此直接傳入外部長文字的服務可能被長時間佔用（32,000 個字母在 npm 套件需 0.5 秒、Python 需 2 秒，現在 Python 約
+1 毫秒、npm 0.05 毫秒）。npm、Python、Swift、Android 與 Flutter 套件已修正；Rust crate 與 C 核心沒有這一層。每個套件都以六個結構字元組成的
+7 個字元以內的所有字串，以及隨機 Unicode 字串，將新的比對器與舊的逐一對照。由 Joonho Lee 私下通報。Python 套件另外修正：
+LiteLLM guardrail 接受寫在 config.yaml 的 `allow` 與 `block` 項目。1.6.0 之後加入的 Rust crate
+[`newmean-pii`](rust/README.md) 也採用相同版本。
 
 ## 儲存庫結構
 

@@ -56,3 +56,95 @@ def test_whitespace_is_javascripts():
         ("900101﻿1234567", "ID_NUMBER"),
         ("010﻿1234﻿5678", "PHONE"),
     ]
+
+
+def legacy_regex_spans(text, rules=None):
+    """The matcher of 1.6.0 and earlier, kept as the reference: regex_spans must give its spans, in its order. It tried
+    the EMAIL pattern again from every character of a run without "@" and compared each match with all earlier spans, so
+    its time grew with the square of the input (fixed in 1.6.1)."""
+    from newmean_pii import REGEX_RULES, Span
+
+    out = []
+    for label, pattern in REGEX_RULES if rules is None else rules:
+        for m in pattern.finditer(text):
+            start, end = m.span()
+            if any(start < s.end and s.start < end for s in out):
+                continue
+            out.append(Span(start, end, label, "regex"))
+    return out
+
+
+def test_equals_the_legacy_matcher_exhaustively():
+    alphabet = "a@.-+ "
+    bad = []
+    checked = 0
+    texts = [""]
+    for _ in range(7):
+        checked += len(texts)
+        bad += [t for t in texts if regex_spans(t) != legacy_regex_spans(t)]
+        texts = [t + c for t in texts for c in alphabet]
+    checked += len(texts)
+    bad += [t for t in texts if regex_spans(t) != legacy_regex_spans(t)]
+    assert bad[:5] == []
+    assert checked == 335923
+
+
+def test_equals_the_legacy_matcher_on_random_unicode():
+    import random
+
+    alphabet = [
+        "a", "Z", "7", "@", "@", ".", ".", "+", "-", "_", " ", "\n", " ", "한", "é", "𐐀", "𝟙", "①", "́", "😀", "\ud800", "\udc00",
+        ":", "/", "(", ")", "w", "0", "1", "http://", "www.", "\x1c", "\x85", "﻿",
+    ]
+    rng = random.Random(20261117)
+    bad = []
+    for _ in range(40000):
+        t = "".join(rng.choice(alphabet) for _ in range(rng.randrange(60)))
+        if regex_spans(t) != legacy_regex_spans(t):
+            bad.append(t)
+    assert bad[:5] == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "a@b.co@d.e", "a@b.co-+x@c.de", "a@b..co", "a@@b.co", "a@b.co.", ".a+@b.co", "a@b", "@b.co", "a@.co", "a@b.c@d.e.f",
+        "😀 김+𐐀@회사.한국 𝟙@𐐀.한", "é@a.co ①@b.co a@b.①", "a\ud800@b.co a@b.\udc00",
+        "www.site.test/x@y.co 010-1234-5678 https://other.test", "a@b.co http://one.test a@b.co",
+        "900101-1234567 4111 1111 1111 1111 +1 (212) 555-1234", "https://a@b.co/x?mail=c@d.co",
+    ],
+)
+def test_equals_the_legacy_matcher_on_edge_cases(text):
+    assert regex_spans(text) == legacy_regex_spans(text)
+
+
+def test_equals_the_legacy_matcher_with_changed_rules(monkeypatch):
+    import newmean_pii._regex as mod
+
+    builtin = list(mod.REGEX_RULES)
+    sets = [
+        [("EMAIL", re.compile("CUSTOM"))],
+        [builtin[1], ("CONTACT", builtin[0][1])],
+        [("EMPTY", re.compile("(?=b)")), ("REPLACED", re.compile("ab")), ("TAIL", re.compile("b|c"))],
+        [("A", re.compile("a*")), ("B", re.compile("b*")), ("ALL", re.compile("."))],
+        [("POINT", re.compile("(?=a)")), ("ALL", re.compile(".")), ("A", re.compile("a"))],
+        builtin + [("WORD", re.compile("[a-z]+"))],
+    ]
+    for rules in sets:
+        monkeypatch.setattr(mod, "REGEX_RULES", rules)
+        for text in ["", "a", "b", "ab", "abc", "baba", "😀ab😀a", "CUSTOM a@b.co", "https://a@b.co x@y.co"]:
+            assert regex_spans(text) == legacy_regex_spans(text, rules), (rules, text)
+
+
+def test_long_inputs_take_time_in_proportion_to_their_length():
+    """1.6.0 needed about 20 s for the first text on the machine that takes a few ms here."""
+    import time
+
+    t0 = time.perf_counter()
+    for text in ["a" * 100000, "a@" + "b" * 100000, "@" * 100000, "a." * 50000, "1" * 100000]:
+        assert [s for s in regex_spans(text) if s.label == "EMAIL"] == []
+    text = "a@b.co " * 40000
+    spans = regex_spans(text)
+    assert len(spans) == 40000
+    assert spans[0] == (0, 6, "EMAIL", "regex") and spans[-1] == (279993, 279999, "EMAIL", "regex")
+    assert time.perf_counter() - t0 < 5

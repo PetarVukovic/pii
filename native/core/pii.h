@@ -39,7 +39,7 @@ extern "C" {
 #define PII_API
 #endif
 
-#define PII_VERSION "1.6.0"       /* this library */
+#define PII_VERSION "1.6.1"       /* this library */
 #define PII_MODEL_VERSION "1.1.0" /* model release (Hugging Face tag v1.1.0) */
 #define PII_DEFAULT_SIZE "medium"
 
@@ -190,7 +190,7 @@ typedef struct {
 #define PII_TABLE_CONTEXT_NONE 0
 #define PII_TABLE_CONTEXT_HEADER 1
 
-/* Library version ("1.6.0"). */
+/* Library version ("1.6.1"). */
 PII_API const char *pii_version(void);
 /* Message of a return code ("invalid argument", ...); static, never NULL. */
 PII_API const char *pii_strerror(int code);

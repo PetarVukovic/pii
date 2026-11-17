@@ -1,3 +1,9 @@
+## 1.6.1
+
+- Models `newmean-pii-<size>` v1.1.0, as in 1.6.0.
+- Fix: with `regex: true`, the time of the pattern layer grew with the square of the input on long texts (a long run of
+  letters without "@", or many pattern matches). It is now proportional to the length; `regexSpans` returns the same spans.
+
 ## 1.6.0
 
 - Models `newmean-pii-<size>` v1.1.0, as in 1.5.0. Version number only: release 1.6.0 adds adapters to the Python and
