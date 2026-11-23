@@ -1,0 +1,17 @@
+{
+  "name": "clearcopy",
+  "version": "0.1.0",
+  "description": "Read approved ClearCopy exports from the user's local inbox.",
+  "author": { "name": "Petar Vukovic" },
+  "license": "MIT",
+  "repository": "https://github.com/PetarVukovic/pii",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "ClearCopy",
+    "shortDescription": "Local-first PDF and prompt redaction",
+    "developerName": "Petar Vukovic",
+    "category": "Productivity",
+    "brandColor": "#4928C8"
+  }
+}

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Review and remove private information from PDFs and prompts locally before sharing with AI.">
+  <title>ClearCopy — Private documents, ready for AI</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/main.js"></script>
+</head>
+<body>
+  <header class="top wrap">
+    <a class="brand" href="#"><span class="mark" aria-hidden="true"></span>ClearCopy</a>
+    <nav aria-label="Main">
+      <a href="#studio" data-en="Workspace" data-hr="Radni prostor">Workspace</a>
+      <a href="#integrations" data-en="Integrations" data-hr="Integracije">Integrations</a>
+      <a href="https://github.com/PetarVukovic/pii" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      <button id="language" class="outline" type="button" aria-label="Hrvatski">HR</button>
+    </nav>
+  </header>
+  <main>
+    <section class="hero wrap">
+      <div class="intro">
+        <p class="kicker" data-en="Open-source PDF and prompt redaction" data-hr="Redakcija PDF-ova i upita otvorenog koda">Open-source PDF and prompt redaction</p>
+        <h1 data-en="Share the document. Keep the private details." data-hr="Podijeli dokument. Sačuvaj privatne podatke.">Share the document. Keep the private details.</h1>
+        <p class="lede" data-en="Find personal details in PDFs and prompts, review the marks, and share a clean copy with ChatGPT, Codex, or Claude. Processing happens on your device." data-hr="Pronađi osobne podatke u PDF-ovima i upitima, pregledaj oznake i podijeli očišćenu kopiju s ChatGPT-om, Codexom ili Claudeom. Obrada se odvija na tvojem uređaju.">Find personal details in PDFs and prompts, review the marks, and share a clean copy with ChatGPT, Codex, or Claude. Processing happens on your device.</p>
+        <div class="actions">
+          <a class="primary" href="#studio" data-en="Open workspace ↓" data-hr="Otvori radni prostor ↓">Open workspace ↓</a>
+          <button id="demo" class="outline" data-en="Try a sample NDA" data-hr="Isprobaj ogledni NDA">Try a sample NDA</button>
+        </div>
+      </div>
+      <div class="case" aria-label="Illustration of document redaction">
+        <div class="case-head"><span>mutual-nda.pdf</span><span data-en="Sample" data-hr="Primjer">Sample</span></div>
+        <div class="docs">
+          <article class="paper"><span class="doc-tag" data-en="Original" data-hr="Izvornik">Original</span><h2>Mutual NDA</h2><p>Northwind Studio</p><hr><small data-en="Contact name" data-hr="Kontakt osoba">Contact name</small><p>Daniel Harper</p><small data-en="Email address" data-hr="E-mail adresa">Email address</small><p>daniel@example.com</p><hr><p class="fine">The parties agree to protect confidential information shared during the evaluation.</p></article>
+          <article class="paper redacted"><span class="doc-tag" data-en="Approved copy" data-hr="Odobrena kopija">Approved copy</span><h2>Mutual NDA</h2><p>Northwind Studio</p><hr><small data-en="Contact name" data-hr="Kontakt osoba">Contact name</small><p><span class="stripe name"></span></p><small data-en="Email address" data-hr="E-mail adresa">Email address</small><p><span class="stripe mail"></span></p><hr><p class="fine">The parties agree to protect confidential information shared during the evaluation.</p></article>
+        </div>
+        <div class="case-foot" data-en="The exported copy contains opaque marks over selected content." data-hr="Izvezena kopija sadrži neprozirne oznake preko odabranog sadržaja.">The exported copy contains opaque marks over selected content.</div>
+      </div>
+    </section>
+    <section id="studio" class="workspace">
+      <div class="wrap">
+        <div class="section-head"><h2 data-en="Redaction workspace" data-hr="Radni prostor za redakciju">Redaction workspace</h2><p data-en="Review every page and add marks over anything the detector misses." data-hr="Pregledaj svaku stranicu i označi sve što detektor propusti.">Review every page and add marks over anything the detector misses.</p></div>
+        <div class="studio">
+          <div class="controls">
+            <label><span data-en="Open PDF" data-hr="Otvori PDF">Open PDF</span><input id="file" type="file" accept=".pdf,application/pdf"></label>
+            <label><span data-en="OCR language" data-hr="Jezik OCR-a">OCR language</span><select id="ocr"><option value="en">English</option><option value="hr">Hrvatski + English</option></select></label>
+            <label><span data-en="Detection model" data-hr="Model detekcije">Detection model</span><select id="model"><option value="nano">Nano</option><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></label>
+            <span class="muted">25 MB · 20 <span data-en="pages" data-hr="stranica">pages</span></span>
+          </div>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+          <div id="review" hidden>
+            <div class="reviewbar">
+              <button id="prev" class="outline" aria-label="Previous page">←</button><output id="page"></output><button id="next" class="outline" aria-label="Next page">→</button>
+              <label class="check"><input type="checkbox" id="reviewed"> <span data-en="I reviewed this page" data-hr="Pregledao sam ovu stranicu">I reviewed this page</span></label>
+            </div>
+            <div class="spread">
+              <figure><figcaption data-en="Original" data-hr="Izvornik">Original</figcaption><canvas id="original" role="img" aria-label="Original page"></canvas></figure>
+              <figure><figcaption data-en="Export preview" data-hr="Pregled izvoza">Export preview</figcaption><canvas id="preview" tabindex="0" aria-label="Page with selected redactions. Use arrows to move, Shift with arrows to resize, and Enter to add a mark."></canvas></figure>
+            </div>
+            <p class="muted" data-en="Drag on the export preview to add a mark, or use the arrow keys after focusing it. Remove a mark using the list below." data-hr="Povuci po pregledu za novu oznaku ili fokusiraj pregled i koristi strelice. Oznaku možeš ukloniti s popisa ispod.">Drag on the export preview to add a mark, or use the arrow keys after focusing it. Remove a mark using the list below.</p>
+            <ul id="boxes" class="boxes"></ul>
+          </div>
+          <div class="prompt">
+            <label for="source" data-en="Prompt to redact" data-hr="Upit za redakciju">Prompt to redact</label>
+            <textarea id="source" maxlength="100000" rows="3" spellcheck="false" autocomplete="off"></textarea>
+            <button id="mask" class="outline" data-en="Find and mask details" data-hr="Pronađi i maskiraj podatke">Find and mask details</button>
+            <div id="prompt-result" hidden>
+              <label for="masked" data-en="Review and edit the outgoing prompt" data-hr="Pregledaj i uredi upit za slanje">Review and edit the outgoing prompt</label>
+              <textarea id="masked" maxlength="100000" rows="3" spellcheck="false" autocomplete="off"></textarea>
+              <label class="check"><input type="checkbox" id="prompt-approved"> <span data-en="I reviewed this prompt" data-hr="Pregledao sam ovaj upit">I reviewed this prompt</span></label>
+            </div>
+          </div>
+          <div class="actions export">
+            <button id="download" class="primary" disabled data-en="Download PDF" data-hr="Preuzmi PDF">Download PDF</button>
+            <button id="copy" class="outline" disabled data-en="Copy prompt" data-hr="Kopiraj upit">Copy prompt</button>
+            <button id="bundle" class="outline" disabled data-en="Download local MCP bundle" data-hr="Preuzmi paket za lokalni MCP">Download local MCP bundle</button>
+            <button id="share" class="outline" disabled hidden data-en="Share via remote MCP" data-hr="Podijeli kroz udaljeni MCP">Share via remote MCP</button>
+          </div>
+          <p id="approved-summary" class="muted" aria-live="polite"></p>
+          <p id="transfer" class="muted" role="status"></p>
+          <div id="share-result" hidden><label for="code" data-en="One-time code. Paste it into your MCP-enabled chat within 10 minutes." data-hr="Jednokratni kod. Zalijepi ga u chat s MCP-om unutar 10 minuta.">One-time code. Paste it into your MCP-enabled chat within 10 minutes.</label><input id="code" readonly></div>
+        </div>
+      </div>
+    </section>
+    <section id="integrations" class="wrap integrations">
+      <div class="section-head"><h2 data-en="Use your approved copy in AI" data-hr="Koristi odobrenu kopiju u AI-ju">Use your approved copy in AI</h2></div>
+      <div class="cards">
+        <article><h3>ChatGPT</h3><p data-en="Connect the HTTPS MCP server and redeem your one-time code." data-hr="Poveži HTTPS MCP poslužitelj i iskoristi jednokratni kod.">Connect the HTTPS MCP server and redeem your one-time code.</p></article>
+        <article><h3>Codex &amp; Claude</h3><p data-en="Install the bundled skill and import a reviewed export into the local MCP inbox." data-hr="Instaliraj skill i uvezi pregledani izvoz u lokalni MCP.">Install the bundled skill and import a reviewed export into the local MCP inbox.</p></article>
+        <article><h3 data-en="Self-host" data-hr="Pokreni samostalno">Self-host</h3><p data-en="Run the web editor, MCP server, or the optional native PyMuPDF OCR and Layout workflow." data-hr="Pokreni web editor, MCP poslužitelj ili dodatni lokalni PyMuPDF OCR i Layout.">Run the web editor, MCP server, or the optional native PyMuPDF OCR and Layout workflow.</p></article>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap footer">
+    <a class="brand" href="#"><span class="mark" aria-hidden="true"></span>ClearCopy</a>
+    <p data-en="ClearCopy code: MIT. Newmean PII: Apache-2.0. Optional PyMuPDF: AGPL-3.0 or Artifex commercial license." data-hr="ClearCopy kod: MIT. Newmean PII: Apache-2.0. Dodatni PyMuPDF: AGPL-3.0 ili Artifexova komercijalna licenca.">ClearCopy code: MIT. Newmean PII: Apache-2.0. Optional PyMuPDF: AGPL-3.0 or Artifex commercial license.</p>
+    <a href="/LICENSE.txt">MIT</a> · <a href="/NEWMEAN-NOTICE.txt">Notices</a>
+  </footer>
+</body>
+</html>

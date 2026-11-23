@@ -1,5 +1,23 @@
 English | [한국어](README.ko.md) | [繁體中文](README.zh-Hant.md)
 
+# ClearCopy
+
+ClearCopy is an open-source, local-first privacy step for PDFs and prompts. Open a PDF on your computer, review proposed redactions, download a new copy, and attach that copy to ChatGPT, Claude or Codex. Newmean PII runs on the device. The local MCP reads exports you explicitly import.
+
+**[Install and run ClearCopy](product/README.md)** · **[Browse releases](https://github.com/PetarVukovic/pii/releases)**
+
+### Before and after · Synthetic NDA
+
+| Original, first page | Approved redacted export, first page |
+| --- | --- |
+| [![Synthetic NDA with sample contact details](product/examples/nda/nda-before.png)](product/examples/nda/nda-before.pdf) | [![Same NDA with plum marks over selected information](product/examples/nda/nda-after.png)](product/examples/nda/nda-after.pdf) |
+
+The example PDF contains a text page and a scanned page. All names and e-mail addresses are fictional or reserved for examples. The export keeps the page dimensions and visual layout. Opaque plum marks replace the selected pixels and the source text layer, attachments and metadata are omitted.
+
+ClearCopy additions are [MIT](product/LICENSE). The bundled Newmean SDK and model weights retain [Apache-2.0](LICENSE). Optional PyMuPDF, PyMuPDF Layout and PyMuPDF4LLM are available under **AGPL-3.0 or Artifex commercial terms**.
+
+---
+
 # @newmean-ai/pii
 
 **Browser-side PII redaction.** Detect and mask personal information (names, emails, phone numbers, addresses, IDs, …) in text **entirely in the browser**, so the original text never leaves the user's device.

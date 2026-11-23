@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "clearcopy": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "--package=https://github.com/PetarVukovic/pii/releases/download/clearcopy-v0.1.0/petarvukovic-clearcopy-0.1.0.tgz",
+        "clearcopy",
+        "mcp"
+      ]
+    }
+  }
+}

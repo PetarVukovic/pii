@@ -1,0 +1,12 @@
+{
+  "name": "clearcopy",
+  "interface": { "displayName": "ClearCopy" },
+  "plugins": [
+    {
+      "name": "clearcopy",
+      "source": { "source": "local", "path": "./product" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}

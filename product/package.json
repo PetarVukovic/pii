@@ -1,0 +1,70 @@
+{
+  "name": "@petarvukovic/clearcopy",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit --strict --skipLibCheck --target es2022 --module esnext --moduleResolution bundler src/main.ts",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "mcp": "node server/local.mjs",
+    "test": "node --test test/*.test.mjs",
+    "bench": "node test/benchmark.mjs",
+    "local": "node server/cli.mjs web",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@newmean-ai/pii": "1.6.2",
+    "@tesseract.js-data/eng": "^1.0.0",
+    "@tesseract.js-data/hrv": "^1.0.0",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.5.438",
+    "tesseract.js": "^7.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261123.1",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.65.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.166.0"
+  },
+  "license": "MIT",
+  "description": "Local-first PDF and prompt redaction with MCP",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PetarVukovic/pii.git",
+    "directory": "product"
+  },
+  "bin": {
+    "clearcopy": "server/cli.mjs"
+  },
+  "keywords": [
+    "pdf",
+    "redaction",
+    "pii",
+    "mcp",
+    "privacy"
+  ],
+  "files": [
+    "dist",
+    "server/bundle.mjs",
+    "server/cli.mjs",
+    "server/headers.mjs",
+    "server/hosted-plugin.mjs",
+    "server/local.mjs",
+    "server/mcp.mjs",
+    "server/raster-pdf.mjs",
+    "server/web.mjs",
+    "skills",
+    "plugin.json",
+    "mcp.json",
+    ".mcp.json",
+    ".codex-plugin",
+    ".claude-plugin"
+  ]
+}

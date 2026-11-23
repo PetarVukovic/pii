@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "clearcopy",
+  "version": "0.1.0",
+  "description": "Use only documents and prompts the user has reviewed and exported locally.",
+  "author": { "name": "Petar Vukovic" },
+  "license": "MIT",
+  "repository": "https://github.com/PetarVukovic/pii",
+  "keywords": ["pdf", "redaction", "privacy", "pii", "mcp"]
+}

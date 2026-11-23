@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "clearcopy",
+  "version": "0.1.0",
+  "description": "Read approved ClearCopy exports from the user's local inbox.",
+  "author": { "name": "Petar Vukovic" },
+  "license": "MIT",
+  "repository": "https://github.com/PetarVukovic/pii",
+  "mcpServers": "./.mcp.json"
+}

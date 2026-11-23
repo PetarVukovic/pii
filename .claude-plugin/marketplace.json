@@ -1,0 +1,15 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "clearcopy",
+  "owner": { "name": "Petar Vukovic" },
+  "plugins": [
+    {
+      "name": "clearcopy",
+      "source": "./product",
+      "description": "Use reviewed ClearCopy exports through a local MCP server.",
+      "version": "0.1.0",
+      "license": "MIT",
+      "category": "productivity"
+    }
+  ]
+}

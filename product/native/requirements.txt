@@ -1,0 +1,4 @@
+pymupdf==2.1
+pymupdf-layout==2.1
+pymupdf4llm==2.1
+newmean-pii==1.6.1

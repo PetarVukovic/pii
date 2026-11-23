@@ -1,0 +1,15 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "clearcopy": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "--yes",
+        "--package=https://github.com/PetarVukovic/pii/releases/download/clearcopy-v0.1.0/petarvukovic-clearcopy-0.1.0.tgz",
+        "clearcopy",
+        "mcp"
+      ]
+    }
+  }
+}
